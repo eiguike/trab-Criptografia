@@ -1,3 +1,14 @@
+// Henrique Teruo Eihara  RA: 490016
+// Gustavo Rodrigues      RA: 489999
+//
+// Primeiro Trabalho de Introdução a Criptografia
+//
+// DES é um cifrador simétrico, em que a mesma chave
+// é utilizada para cifrar e decifrar. Ele utiliza
+// mecanismos de cifragem em blocos, em que toda
+// cifragem é feita em 16 rodadas, sendo cada rodada
+// feita a mesma operação.
+
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
