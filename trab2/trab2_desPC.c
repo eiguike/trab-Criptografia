@@ -33,10 +33,11 @@ const char pc2[] = {
 
 // imprime em formato hexadecimal
 // uma cadeia de bits
-void printH(const char * input){
+void printH(const unsigned  char * input){
   int i;
+  printf("0x");
   for(i=7;i>=0;i--)
-    printf("%hhx ",input[i]);
+    printf("%02X",input[i]);
   printf("\n");
 }
 
@@ -50,9 +51,9 @@ unsigned long long int permutedKey(unsigned long long int entrada, int flag){
   for(i=0;i<i2;i++){
       resultado <<= 1;
       if(!flag)
-        resultado |= ((entrada >> (64-pc[i])) & bitIsolador);
+        resultado |= ((entrada >> (64 - pc[i])) & bitIsolador);
       else
-        resultado |= ((entrada >> (56-pc2[i])) & bitIsolador);
+        resultado |= ((entrada >> (56 - pc2[i])) & bitIsolador);
   }
 
   return resultado;
@@ -60,11 +61,14 @@ unsigned long long int permutedKey(unsigned long long int entrada, int flag){
 
 // função que realiza a parte de permutação de chaves
 // entre as 16 rodadas
-int keySchedule(unsigned long long int input){
+void keySchedule(unsigned long long int input){
   unsigned long long int aux;
   int i;
 
   aux = permutedKey(input, 0);
+
+  printf("Chave Permutada: \t");
+  printH((unsigned char*)&aux);
 
   // dividindo em c e d a chave permutada
   d[0] = aux & 0xFFFFFFF;
@@ -72,7 +76,7 @@ int keySchedule(unsigned long long int input){
 
   // realizando as 16 rodadas
   for(i=1;i<17;i++){
-    switch (i){
+   switch (i){
       case 1:
       case 2:
       case 9:
