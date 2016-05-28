@@ -30,8 +30,11 @@ void sam(mpz_t H,mpz_t base,mpz_t modulus, mpz_t r){
 
     mpz_tdiv_q_2exp(H, H,1); 
   }
+
+  mpz_clears(mask, rop, NULL);
 }
 
+/*
 int main(){
   mpz_t base, H, modulus, result;
   mpz_init(base);
@@ -47,4 +50,4 @@ int main(){
   gmp_printf("%Zd\n",result);
 
   return 0;
-}
+}*/
