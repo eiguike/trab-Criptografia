@@ -29,7 +29,7 @@ void generateKeys(Key * k);
 int main(){
   int base;
 
-  printf("10 - Decimal\n 16 - Hexadecimal\n Your choose: ");
+  printf("10 - Decimal\n16 - Hexadecimal\nYour choose: ");
   scanf("%d",&base);
 
   if((base != 10)&&(base!= 16))
@@ -65,20 +65,18 @@ int main(){
 
   generateKeys(&key);
 
-  gmp_printf("Modulus: %Zd\n", key.n);
+  gmp_printf("MODULUS: %Zd\n", key.n);
   if(base == 16){
-    gmp_printf("Public Key generated: %Zx\n", key.e);
-    gmp_printf("Secret Key generated: %Zx\n", key.d);
+    gmp_printf("PUBLIC KEY: %Zx\n", key.e);
+    gmp_printf("SECRET KEY: %Zx\n", key.d);
+    printf("YOUR TEXT: ");
     gmp_scanf("%Zx",textIn);
   }else{
-    gmp_printf("Public Key generated: %Zd\n", key.e);
-    gmp_printf("Secret Key generated: %Zd\n", key.d);
+    gmp_printf("PUBLIC KEY: %Zd\n", key.e);
+    gmp_printf("SECRET KEY: %Zd\n", key.d);
+    printf("YOUR TEXT: ");
     gmp_scanf("%Zd",textIn);
   }
-
-  // creating a message
-  //gmp_randstate_t state;
-  //gmp_randinit_default(state);
 
   // ecrypting
   sam(key.e, textIn, key.n, result);
@@ -87,15 +85,15 @@ int main(){
   sam(key.d, result, key.n, result2);
 
   if(base == 16){
-    printf("-------------------------ENCRYPT MESSAGE--------------------------");
+    printf("-------------------------ENCRYPT MESSAGE--------------------------\n");
     gmp_printf("%Zx\n", result);
-    printf("-------------------------DECRYPT MESSAGE--------------------------");
-    gmp_printf("%Zx\n", result);
+    printf("-------------------------DECRYPT MESSAGE--------------------------\n");
+    gmp_printf("%Zx\n", result2);
   }else{
-    printf("-------------------------ENCRYPT MESSAGE--------------------------");
+    printf("-------------------------ENCRYPT MESSAGE--------------------------\n");
     gmp_printf("%Zd\n", result);
-    printf("-------------------------DECRYPT MESSAGE--------------------------");
-    gmp_printf("%Zd\n", result);
+    printf("-------------------------DECRYPT MESSAGE--------------------------\n");
+    gmp_printf("%Zd\n", result2);
   }
 
   mpz_clears(key.n, key.e, key.d, key.p, key.q, textIn, result, result2, NULL);
@@ -119,34 +117,25 @@ void generateKeys(Key * k){
   mpz_set(mask, aux); // saving the value
   mpz_nextprime(k->p, aux);
 
-  mpz_mod(aux2, k->p, k->e);
-  while(mpz_cmp_ui(aux2, 1) == 0){
-    mpz_nextprime(k->p, aux);
-    mpz_mod(aux2, k->p, k->e);
-  }
-
-  gmp_printf("P: %Zd\n", k->p);
+  //gmp_printf("P: %Zd\n", k->p);
 
   // choosing now prime number for q
-  do{
-    mpz_set_ui(aux2,1);
-    // setting a large number in q
-    mpz_mul_2exp(aux2, aux2, (keyLength/2)-1);
-    mpz_urandomb(aux, state, keyLength/2);
-    mpz_add(aux, aux2, aux);
-    mpz_set(mask, aux); // saving the value
-    mpz_nextprime(k->q, aux);
-    mpz_mod(aux2, k->q, k->e);
-    while(mpz_cmp_ui(aux2, 1) == 0){
-      mpz_nextprime(k->q, aux);
-      mpz_mod(aux2, k->q, k->e);
-    }
-  }while(mpz_cmp(k->p, k->q) == 0);
+  mpz_set_ui(aux2,1);
+  // setting a large number in q
+  mpz_mul_2exp(aux2, aux2, (keyLength/2)-1);
+  mpz_urandomb(aux, state, keyLength/2);
+  mpz_add(aux, aux2, aux);
+  mpz_set(mask, aux); // saving the value
+  mpz_nextprime(k->q, aux);
+  while(mpz_cmp(k->q,k->p) == 0){
+    mpz_nextprime(k->q, k->q);
+  }
 
-  gmp_printf("Q: %Zd\n", k->q);
+  //gmp_printf("Q: %Zd\n", k->q);
 
   mpz_mul(k->n, k->p, k->q);
 
+  // computing totiente
   mpz_t totiente;
   mpz_init(totiente);
 
@@ -154,15 +143,18 @@ void generateKeys(Key * k){
   mpz_sub_ui(aux2, k->q, 1);
   mpz_mul(totiente, aux2, aux);
 
-  mpz_set_ui(aux2, 0);
+  mpz_set(aux2, totiente);
   mpz_nextprime(aux2, aux2);
 
-  while(mpz_gcd(aux, totiente, aux2), mpz_cmp_ui(aux,1) != 0 ){
-    mpz_nextprime(aux2,aux2);
+  gmp_randinit_default(state);
+
+  while(mpz_gcd(aux, k->e, totiente), mpz_cmp_ui(aux, 1) != 0){
+    mpz_urandomm(k->e, state, totiente);
   }
 
-  mpz_invert(k->d, k->e, totiente);
-  gmp_printf("k->d: %Zd\n", k->d);
-  gmp_printf("k->d: %Zd\n", k->d);
+  mpz_gcdext(aux, aux2, mask, totiente, k->e);
+  mpz_set(k->d, mask);
+  //gmp_printf("k->d: %Zd\n", k->d);
 
+  mpz_clears(aux, aux2, mask, totiente, NULL);
 }
